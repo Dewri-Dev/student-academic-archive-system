@@ -1,5 +1,5 @@
 # student-_academic_App
-website link: https://student-app-2au6.onrender.com
+website link: https://student-app-vut7.onrender.com/
 # 🎓 Student Academic Archive System
 
 A full-stack academic management platform designed to help students and administrators manage academic resources efficiently.
