@@ -1,88 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Activity Logs - Admin</title>
+{% extends "base.html" %}
+{% block title %}User Management | Academic Archive{% endblock %}
 
-    <!-- Tailwind CSS for styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
+{% block content %}
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    .hover-lift {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+</style>
+
+<div class="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-violet-100 selection:text-violet-900 pb-20">
     
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <style>
-        /* Apply the Inter font family */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Animated gradient background */
-        .gradient-bg {
-            background: linear-gradient(-45deg, #1a202c, #2d3748, #4a5568, #2d3748);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
-        }
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-    </style>
-</head>
-<body class="gradient-bg text-white">
-
-    <div class="flex flex-col min-h-screen">
-        <!-- Navigation Bar -->
-        <nav class="p-4 md:p-6 bg-gray-800/30 border-b border-gray-700/50">
-            <div class="container mx-auto flex justify-between items-center">
-                <h1 class="text-xl md:text-2xl font-bold tracking-tight">
-                    Activity Logs
-                </h1>
-                <a href="/" class="px-4 py-2 text-sm font-medium border border-gray-500 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors">
-                    Back to Home
+    <div class="max-w-[1400px] mx-auto px-6 lg:px-10 py-10">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center shadow-inner">
+                        <i class="ph ph-users-three text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">User Management</h1>
+                </div>
+                <p class="text-slate-500 font-medium ml-13">View and manage all registered student and administrator accounts.</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="/" class="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm">
+                    <i class="ph ph-arrow-left text-lg"></i> Back to Home
                 </a>
             </div>
-        </nav>
+        </div>
 
-        <!-- Main Content -->
-        <main class="flex-grow p-4 md:p-8">
-            <div class="container mx-auto">
-                <div class="bg-gray-800/50 border border-gray-700/60 rounded-xl shadow-lg overflow-hidden">
-                    <table class="min-w-full text-left">
-                        <thead class="bg-gray-900/70">
-                            <tr>
-                                <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-300 uppercase tracking-wider">User Email</th>
-                                <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-300 uppercase tracking-wider">Action</th>
-                                <th scope="col" class="px-6 py-3 text-xs font-medium text-gray-300 uppercase tracking-wider">Time</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-700">
-                            {% for log in logs %}
-                            <tr class="hover:bg-gray-700/50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">{{ log[0] }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{{ log[1] }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">{{ log[2] }}</td>
-                            </tr>
-                            {% else %}
-                            <tr>
-                                <td colspan="3" class="text-center py-8 text-gray-400">
-                                    No activity logs found.
+        <div class="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm relative">
+            
+            <div class="absolute -top-32 -right-32 w-64 h-64 bg-violet-50 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="overflow-x-auto relative z-10">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/80 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider backdrop-blur-sm">
+                            <th class="p-6 font-bold w-24">User ID</th>
+                            <th class="p-6 font-bold">Email Address</th>
+                            <th class="p-6 font-bold w-48 text-center">System Role</th>
+                            <th class="p-6 font-bold w-32 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% if users %}
+                            {% for user in users %}
+                            <tr class="hover:bg-slate-50/50 transition-colors group">
+                                <td class="p-6">
+                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-slate-100 text-slate-600 font-bold text-sm">
+                                        {{ user[0] }}
+                                    </span>
+                                </td>
+                                <td class="p-6">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://ui-avatars.com/api/?name={{ user[1].split('@')[0] }}&background=8b5cf6&color=fff&rounded=true" alt="Avatar" class="w-8 h-8 rounded-full shadow-sm">
+                                        <span class="font-bold text-slate-800">{{ user[1] }}</span>
+                                    </div>
+                                </td>
+                                <td class="p-6 text-center">
+                                    {% if user[2] == 1 %}
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-full">
+                                            <i class="ph-fill ph-shield-star"></i> Administrator
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 rounded-full">
+                                            <i class="ph-fill ph-student"></i> Student
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="p-6 text-right">
+                                    <a href="{{ url_for('delete_user', user_id=user[0]) }}" 
+                                       onclick="return confirm('Are you sure you want to permanently delete this user? This action cannot be undone.');"
+                                       class="inline-flex items-center justify-center w-10 h-10 text-slate-400 bg-white border border-slate-200 rounded-xl hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-colors shadow-sm"
+                                       title="Delete User">
+                                        <i class="ph ph-trash text-lg"></i>
+                                    </a>
                                 </td>
                             </tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% else %}
+                            <tr>
+                                <td colspan="4">
+                                    <div class="py-16 text-center">
+                                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <i class="ph-duotone ph-users text-4xl text-slate-400"></i>
+                                        </div>
+                                        <h3 class="text-xl font-bold text-slate-800 mb-2">No users found</h3>
+                                        <p class="text-slate-500">There are currently no registered users in the database.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
             </div>
-        </main>
-        
-        <!-- Footer -->
-        <footer class="text-center p-4 text-sm text-gray-500">
-            &copy; 2025 Student Academic Archive. All Rights Reserved.
-        </footer>
+        </div>
     </div>
+</div>
 
-</body>
-</html>
+{% endblock %}

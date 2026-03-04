@@ -1,71 +1,115 @@
 {% extends "base.html" %}
-{% block title %}Add Notes{% endblock %}
+{% block title %}Add Note | Academic Archive{% endblock %}
 
 {% block content %}
-<div class="bg-white min-h-screen flex items-center justify-center px-4 py-12">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<div class="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 font-sans selection:bg-emerald-100 selection:text-emerald-900">
     
-    <div class="container mx-auto max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden">
-        <div class="grid grid-cols-1 md:grid-cols-2">
+    <div class="absolute top-0 left-0 w-full p-6 lg:p-10 flex justify-between items-center z-10">
+        <div class="flex items-center gap-3 group">
+            <div class="bg-violet-600 p-2 rounded-xl shadow-lg shadow-violet-200">
+                <i class="ph ph-hexagon-fill text-white text-xl"></i>
+            </div>
+            <span class="text-xl font-bold tracking-tight text-slate-800">Archive<span class="text-violet-600">HQ</span></span>
+        </div>
+        <a href="/notes" class="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm">
+            <i class="ph ph-x text-lg"></i> Close
+        </a>
+    </div>
+
+    <div class="max-w-5xl w-full mx-auto bg-white rounded-[2rem] shadow-xl shadow-slate-200/50 overflow-hidden border border-slate-100 relative z-20 mt-12">
+        <div class="flex flex-col md:flex-row h-full">
             
-            <!-- Left Side: Illustration and Info -->
-            <div class="p-8 bg-blue-50 flex flex-col justify-center">
-                <div class="text-center">
-                    <svg class="w-24 h-24 text-blue-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
-                    </svg>
-                    <h2 class="text-2xl font-bold text-gray-800">Share Your Knowledge</h2>
-                    <p class="mt-2 text-gray-600">
-                        Help fellow students by uploading your notes. Every contribution builds a stronger learning community.
+            <div class="md:w-5/12 p-10 bg-emerald-50 flex flex-col justify-center relative overflow-hidden">
+                <div class="absolute -top-20 -left-20 w-64 h-64 bg-emerald-200/40 rounded-full blur-3xl"></div>
+                <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-emerald-200/40 rounded-full blur-3xl"></div>
+                
+                <div class="relative z-10 text-center">
+                    <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-emerald-200/50">
+                        <i class="ph-duotone ph-cloud-arrow-up text-5xl"></i>
+                    </div>
+                    <h2 class="text-3xl font-black text-slate-800 tracking-tight mb-3">Share Your Knowledge</h2>
+                    <p class="text-slate-500 font-medium leading-relaxed">
+                        Help fellow students by uploading your notes, study guides, or summaries. Every contribution builds a stronger learning community.
                     </p>
+                    
+                    <div class="mt-10 flex flex-col gap-4 text-left">
+                        <div class="flex items-center gap-3 text-sm font-bold text-slate-600 bg-white/60 p-3 rounded-xl">
+                            <i class="ph-fill ph-check-circle text-emerald-500 text-lg"></i> Clear, legible documents
+                        </div>
+                        <div class="flex items-center gap-3 text-sm font-bold text-slate-600 bg-white/60 p-3 rounded-xl">
+                            <i class="ph-fill ph-check-circle text-emerald-500 text-lg"></i> Correct semester tagging
+                        </div>
+                        <div class="flex items-center gap-3 text-sm font-bold text-slate-600 bg-white/60 p-3 rounded-xl">
+                            <i class="ph-fill ph-check-circle text-emerald-500 text-lg"></i> PDF, DOCX, or TXT formats
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Side: Form -->
-            <div class="p-8">
-                <h3 class="text-2xl font-semibold text-gray-900 mb-6">Note Details</h3>
+            <div class="md:w-7/12 p-10 md:p-12 flex flex-col justify-center bg-white">
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-slate-800">Note Details</h3>
+                    <p class="text-sm text-slate-500 mt-1">Please provide accurate details to help others find your notes.</p>
+                </div>
+                
                 <form class="space-y-6" action="/notes/add" method="POST" enctype="multipart/form-data">
                     
-                    <!-- Semester Input -->
-                    <div>
-                        <label for="semester" class="block text-sm font-medium text-gray-700">Semester</label>
-                        <input id="semester" name="semester" type="number" min="1" max="8" required 
-                               placeholder="e.g., 3"
-                               class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="semester" class="block text-sm font-bold text-slate-700 mb-1.5">Semester</label>
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="ph ph-calendar-blank text-slate-400 text-lg group-focus-within:text-emerald-500 transition-colors"></i>
+                                </div>
+                                <input id="semester" name="semester" type="number" min="1" max="8" required 
+                                       placeholder="e.g., 3"
+                                       class="block w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 font-medium focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-50 focus:border-emerald-300 transition-all shadow-sm">
+                            </div>
+                        </div>
 
-                    <!-- Subject Input -->
-                    <div>
-                        <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
-                        <input id="subject" name="subject" type="text" required 
-                               placeholder="e.g., Data Structures"
-                               class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                    </div>
-
-                    <!-- File Upload Input -->
-                    <div>
-                        <label for="file-upload" class="block text-sm font-medium text-gray-700">Notes File</label>
-                        <div class="mt-1">
-                            <input id="file-upload" name="file" type="file" accept=".pdf,.docx,.txt" required
-                                   class="block w-full text-sm text-gray-500
-                                          file:mr-4 file:py-2 file:px-4
-                                          file:rounded-full file:border-0
-                                          file:text-sm file:font-semibold
-                                          file:bg-blue-50 file:text-blue-700
-                                          hover:file:bg-blue-100">
-                            <p class="text-xs text-gray-500 mt-1">PDF, DOCX, or TXT files only.</p>
+                        <div>
+                            <label for="subject" class="block text-sm font-bold text-slate-700 mb-1.5">Subject Name</label>
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="ph ph-books text-slate-400 text-lg group-focus-within:text-emerald-500 transition-colors"></i>
+                                </div>
+                                <input id="subject" name="subject" type="text" required 
+                                       placeholder="e.g., Data Structures"
+                                       class="block w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 placeholder-slate-400 font-medium focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-50 focus:border-emerald-300 transition-all shadow-sm">
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
-                    <div class="flex items-center gap-4 pt-4">
-                        <button type="submit" 
-                                class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
-                            Upload Notes
-                        </button>
-                        <a href="/notes" class="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <div>
+                        <label for="file-upload" class="block text-sm font-bold text-slate-700 mb-1.5">Upload Document</label>
+                        <div class="mt-1">
+                            <input id="file-upload" name="file" type="file" accept=".pdf,.docx,.txt" required
+                                   class="block w-full text-sm text-slate-500 bg-slate-50 border border-slate-200 rounded-xl cursor-pointer hover:bg-white focus:bg-white focus:ring-4 focus:ring-emerald-50 focus:border-emerald-300 transition-all shadow-sm
+                                          file:mr-4 file:py-3.5 file:px-6
+                                          file:rounded-l-xl file:border-0 file:-ml-1 file:-mt-1 file:-mb-1
+                                          file:text-sm file:font-bold
+                                          file:bg-emerald-100 file:text-emerald-700
+                                          hover:file:bg-emerald-200 file:cursor-pointer">
+                            <p class="text-xs font-medium text-slate-400 mt-2 flex items-center gap-1">
+                                <i class="ph-fill ph-info text-slate-400"></i>
+                                Accepted formats: PDF, DOCX, TXT. Max size: 10MB.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col-reverse sm:flex-row items-center gap-4 pt-8 border-t border-slate-100">
+                        <a href="/notes" class="w-full sm:w-auto flex-1 flex justify-center py-3.5 px-6 border border-slate-200 rounded-xl shadow-sm text-sm font-bold text-slate-600 bg-white hover:bg-slate-50 transition-colors">
                             Cancel
                         </a>
+                        <button type="submit" 
+                                class="w-full flex-1 flex justify-center items-center gap-2 py-3.5 px-6 border border-transparent rounded-xl shadow-md shadow-emerald-200 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-50 focus:border-emerald-300 transition-all">
+                            <i class="ph ph-upload-simple text-lg"></i>
+                            Upload Notes
+                        </button>
                     </div>
+                    
                 </form>
             </div>
         </div>

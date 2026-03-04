@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Manage Fee Structure | Academic Archive{% endblock %}
+
+{% block content %}
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    .hover-lift {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.1), 0 8px 10px -6px rgba(16, 185, 129, 0.05);
+        border-color: #d1fae5;
+    }
+</style>
+
+<div class="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900 pb-20">
+    <div class="max-w-[1400px] mx-auto px-6 lg:px-10 py-10">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-inner">
+                        <i class="ph ph-sliders-horizontal text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">Manage Fee Structure</h1>
+                </div>
+                <p class="text-slate-500 font-medium ml-13">Administer the official B.Tech course fees for all students.</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="/finance" class="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm">
+                    <i class="ph ph-arrow-left text-lg"></i> Back to Finance
+                </a>
+            </div>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-[2rem] overflow-hidden shadow-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs uppercase tracking-wider">
+                            <th class="p-6 font-bold">Semester</th>
+                            <th class="p-6 font-bold">Admission Fee</th>
+                            <th class="p-6 font-bold">Campus Dev Fee</th>
+                            <th class="p-6 font-bold">Course Fee</th>
+                            <th class="p-6 font-black text-slate-800">Total (Rs.)</th>
+                            <th class="p-6 font-bold text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        {% for fee in fee_structure %}
+                        <tr class="hover:bg-slate-50/50 transition-colors group">
+                            <td class="p-6">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-bold text-emerald-700 bg-emerald-50 rounded-lg border border-emerald-100">
+                                    {{ fee[0] }}{{ 'st' if fee[0] == 1 else 'nd' if fee[0] == 2 else 'rd' if fee[0] == 3 else 'th' }} Sem
+                                </span>
+                            </td>
+                            <td class="p-6 font-medium text-slate-600">₹{{ "{:,}".format(fee[1]) }}</td>
+                            <td class="p-6 font-medium text-slate-600">₹{{ "{:,}".format(fee[2]) }}</td>
+                            <td class="p-6 font-medium text-slate-600">₹{{ "{:,}".format(fee[3]) }}</td>
+                            <td class="p-6 font-black text-slate-800 text-lg">₹{{ "{:,}".format(fee[4]) }}</td>
+                            
+                            <td class="p-6 text-right">
+                                <a href="/finance/edit/{{ fee[0] }}" class="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors border border-amber-200/50">
+                                    <i class="ph ph-pencil-simple text-sm"></i> Edit Fees
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

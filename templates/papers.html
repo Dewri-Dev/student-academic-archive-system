@@ -1,92 +1,147 @@
 {% extends "base.html" %}
 
-{% block title %}Question Papers{% endblock %}
+{% block title %}Question Papers | Academic Archive{% endblock %}
 
 {% block content %}
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-<body class="bg-gray-100 font-sans">
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+    .hover-lift {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hover-lift:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.1), 0 8px 10px -6px rgba(139, 92, 246, 0.05);
+        border-color: #ede9fe; /* violet-100 */
+    }
+</style>
 
-    <!-- Main Container -->
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-
-        <!-- Page Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-8 pb-4 border-b border-gray-200">
-            <h1 class="text-3xl font-bold text-gray-900 mb-4 sm:mb-0">Question Papers</h1>
-            <div class="flex items-center gap-4">
-                <a href="/" class="px-4 py-2 text-sm font-medium bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">Back to Home</a>
+<div class="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-violet-100 selection:text-violet-900 pb-20">
+    
+    <div class="max-w-[1600px] mx-auto px-6 lg:px-10 py-10">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+            <div>
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center">
+                        <i class="ph ph-file-text text-2xl"></i>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-black text-slate-800 tracking-tight">Question Papers</h1>
+                </div>
+                <p class="text-slate-500 font-medium ml-13">Browse, search, and download previous examination papers.</p>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <a href="/" class="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm">
+                    <i class="ph ph-arrow-left text-lg"></i> Back to Dashboard
+                </a>
                 {% if session.is_admin %}
-                    <a href="/papers/add" class="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">Add New Paper</a>
+                    <a href="/papers/add" class="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-violet-600 rounded-xl hover:bg-violet-700 transition-colors shadow-md shadow-violet-200">
+                        <i class="ph ph-plus-circle text-lg"></i> Add Paper
+                    </a>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Search Form -->
-        <div class="mb-8">
-            <form method="GET" action="{{ url_for('papers') }}" class="flex gap-2">
-                <input type="text" name="q" placeholder="Search by subject, semester, or year..." value="{{ query or '' }}" class="flex-grow px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900">
-                <button type="submit" class="px-6 py-2 font-medium bg-blue-700 text-white rounded-md hover:bg-blue-700 transition-colors">Search</button>
+        <div class="mb-10 max-w-3xl">
+            <form method="GET" action="{{ url_for('papers') }}" class="relative group">
+                <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                    <i class="ph ph-magnifying-glass text-slate-400 text-xl group-focus-within:text-violet-500 transition-colors"></i>
+                </div>
+                <input type="text" name="q" placeholder="Search by subject, semester, or year..." value="{{ query or '' }}" 
+                       class="w-full pl-14 pr-32 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-4 focus:ring-violet-50 focus:border-violet-300 outline-none transition-all text-slate-700 placeholder-slate-400 font-medium">
+                <button type="submit" class="absolute inset-y-2 right-2 px-6 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-colors text-sm shadow-sm">
+                    Search
+                </button>
             </form>
         </div>
 
-        <!-- Papers Grid -->
         {% if papers %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {% for paper in papers %}
-                    <div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden group transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
-                        <div class="p-6">
-                            <!-- Paper Subject -->
-                            <h2 class="text-xl font-semibold text-gray-800 mb-2 truncate">{{ paper[3] }}</h2>
-                            
-                            <!-- Semester and Year -->
-                            <p class="text-sm text-gray-500 mb-4">
-                                Semester: {{ paper[1] }} | Year: {{ paper[2] }}
-                            </p>
-                            
-                            <!-- View Link -->
-                            <a href="{{ paper[4] }}" target="_blank" class="w-full flex items-center justify-center gap-2 px-4 py-2 font-semibold bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                                </svg>
-                                <span>View Paper</span>
-                            </a>
+                    <div class="glass-card border border-slate-200 rounded-[1.5rem] p-6 hover-lift relative overflow-hidden group">
+                        
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-violet-50 rounded-full blur-2xl -z-10 group-hover:bg-violet-100 transition-colors"></div>
 
-                            <!-- Admin Actions -->
-                            {% if session.is_admin %}
-                                <div class="mt-4 pt-4 border-t border-gray-200 flex justify-end gap-2">
-                                    <a href="/papers/edit/{{ paper[0] }}" class="px-3 py-1 text-xs font-medium bg-yellow-400 text-white rounded-md hover:bg-yellow-500 transition-colors">Edit</a>
-                                    <a href="/papers/delete/{{ paper[0] }}" class="px-3 py-1 text-xs font-medium bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors" onclick="return confirm('Are you sure you want to delete this paper?');">Delete</a>
-                                </div>
-                            {% endif %}
+                        <div class="z-10 relative flex flex-col h-full">
+                            <div class="mb-4">
+                                <span class="inline-block px-3 py-1 mb-3 text-xs font-bold text-violet-700 bg-violet-100 rounded-lg tracking-wide uppercase">
+                                    Semester {{ paper[1] }}
+                                </span>
+                                <h2 class="text-xl font-bold text-slate-800 leading-snug line-clamp-2" title="{{ paper[3] }}">
+                                    {{ paper[3] }}
+                                </h2>
+                                <p class="text-sm font-medium text-slate-500 mt-2 flex items-center gap-1.5">
+                                    <i class="ph ph-calendar-blank"></i> Year: {{ paper[2] }}
+                                </p>
+                            </div>
+                            
+                            <div class="flex-grow"></div>
+
+                            <div class="mt-6 space-y-3">
+                                <a href="{{ paper[4] }}" target="_blank" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-slate-50 hover:bg-violet-50 text-slate-700 hover:text-violet-700 font-bold text-sm rounded-xl border border-slate-200 hover:border-violet-200 transition-colors">
+                                    <i class="ph ph-download-simple text-lg"></i>
+                                    View Document
+                                </a>
+
+                                {% if session.is_admin %}
+                                    <div class="flex gap-2 pt-3 border-t border-slate-100">
+                                        <a href="/papers/edit/{{ paper[0] }}" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-amber-600 bg-amber-50 hover:bg-amber-100 rounded-lg transition-colors">
+                                            <i class="ph ph-pencil-simple"></i> Edit
+                                        </a>
+                                        <a href="/papers/delete/{{ paper[0] }}" class="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors" onclick="return confirm('Are you sure you want to permanently delete this paper?');">
+                                            <i class="ph ph-trash"></i> Delete
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
         
-            <!-- No Papers Message -->
-            <div class="text-center py-16 px-6 bg-white rounded-lg shadow-md">
-                <h2 class="text-xl font-semibold text-gray-700">
+            <div class="bg-white border border-slate-200 rounded-[2rem] p-12 text-center max-w-2xl mx-auto mt-10 shadow-sm">
+                <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="ph-duotone ph-folder-dashed text-5xl text-slate-400"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">
                     {% if query %}
-                        No Question Papers Found for "{{ query }}"
+                        No results found for "{{ query }}"
                     {% else %}
-                        No Question Papers Found
+                        No Question Papers Available
                     {% endif %}
                 </h2>
-                <p class="text-gray-500 mt-2">
+                <p class="text-slate-500 mb-8 max-w-md mx-auto leading-relaxed">
                     {% if query %}
-                        Please try a different search term.
+                        We couldn't find any papers matching your search criteria. Try adjusting your keywords or clearing the search.
                     {% else %}
-                        There are no papers to display at the moment. Please check back later.
+                        The archive is currently empty. Check back later or add new papers to get started.
                     {% endif %}
                 </p>
-                {% if session.is_admin and not query %}
-                    <a href="/papers/add" class="mt-6 inline-block px-6 py-2 text-sm font-medium bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                        Add the First Paper
-                    </a>
-                {% endif %}
+                
+                <div class="flex items-center justify-center gap-4">
+                    {% if query %}
+                        <a href="{{ url_for('papers') }}" class="px-6 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors">
+                            Clear Search
+                        </a>
+                    {% endif %}
+                    
+                    {% if session.is_admin and not query %}
+                        <a href="/papers/add" class="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white bg-violet-600 rounded-xl hover:bg-violet-700 transition-colors">
+                            <i class="ph ph-plus-circle text-lg"></i> Add First Paper
+                        </a>
+                    {% endif %}
+                </div>
             </div>
+            
         {% endif %}
     </div>
+</div>
 
-</body>
 {% endblock %}

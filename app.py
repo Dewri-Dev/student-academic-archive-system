@@ -12,18 +12,16 @@ UPLOAD_FOLDER = 'uploads/notes'
 ALLOWED_EXTENSIONS = {'pdf', 'docx', 'txt'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Ensure upload directory exists (Crucial for Render ephemeral disk)
+# Ensure upload directory exists
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 DATABASE = "database.db"
 
 def get_db_connection():
-    # check_same_thread=False prevents issues when Gunicorn uses multiple threads
     conn = sqlite3.connect(DATABASE, check_same_thread=False)
     return conn
 
 def init_db():
-    """Initializes the database tables if they don't exist."""
     conn = get_db_connection()
     c = conn.cursor()
     
@@ -73,9 +71,60 @@ def init_db():
             filename TEXT NOT NULL,
             uploader_email TEXT NOT NULL
         );
+        CREATE TABLE IF NOT EXISTS cgpa_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            semester_number INTEGER NOT NULL,
+            credits INTEGER NOT NULL,
+            sgpa REAL NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        CREATE TABLE IF NOT EXISTS credit_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            course_code TEXT NOT NULL,
+            course_name TEXT NOT NULL,
+            credits INTEGER NOT NULL,
+            grade TEXT NOT NULL,
+            semester INTEGER NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
+        
+        -- NEW TABLES FOR FINANCE
+        CREATE TABLE IF NOT EXISTS fee_structure (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            semester INTEGER UNIQUE NOT NULL,
+            admission_fee INTEGER NOT NULL,
+            campus_fee INTEGER NOT NULL,
+            course_fee INTEGER NOT NULL,
+            total_fee INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS student_payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
+            semester INTEGER NOT NULL,
+            status TEXT DEFAULT 'Not Paid',
+            FOREIGN KEY(user_id) REFERENCES users(id)
+        );
     """)
     conn.commit()
     
+    # Pre-insert default B.Tech Fee Structure from the provided image
+    c.execute("SELECT COUNT(*) FROM fee_structure")
+    if c.fetchone()[0] == 0:
+        default_fees = [
+            (1, 10000, 10000, 50000, 70000),
+            (2, 10000, 10000, 40000, 60000),
+            (3, 10000, 10000, 55000, 75000),
+            (4, 10000, 10000, 45000, 65000),
+            (5, 10000, 10000, 60000, 80000),
+            (6, 10000, 10000, 50000, 70000),
+            (7, 10000, 10000, 65000, 85000),
+            (8, 10000, 10000, 55000, 75000)
+        ]
+        c.executemany("INSERT INTO fee_structure (semester, admission_fee, campus_fee, course_fee, total_fee) VALUES (?, ?, ?, ?, ?)", default_fees)
+        conn.commit()
+
     # Create a default admin if no users exist
     c.execute("SELECT * FROM users")
     if not c.fetchone():
@@ -85,93 +134,11 @@ def init_db():
         
     conn.close()
 
-# Run initialization
 init_db()
-# --------------------
 
-
-@app.route("/subjects")
-def subjects():
-    if not session.get("is_admin"):
-        return "Unauthorized", 403
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("SELECT * FROM subjects")
-    all_subjects = c.fetchall()
-    conn.close()
-    return render_template("subjects.html", subjects=all_subjects)
-
-@app.route("/subjects/add", methods=["GET", "POST"])
-def add_subject():
-    if not session.get("is_admin"):
-        return "Unauthorized", 403
-        
-    if request.method == "POST":
-        name = request.form.get("name")
-        semester = request.form.get("semester")
-
-        if not name or not semester:
-            flash("Both subject name and semester are required.", "error")
-            return redirect(url_for("add_subject"))
-
-        conn = get_db_connection()
-        c = conn.cursor()
-
-        c.execute("SELECT id FROM subjects WHERE name = ?", (name,))
-        if c.fetchone():
-            flash(f"The subject '{name}' already exists.", "error")
-        else:
-            c.execute("INSERT INTO subjects (name, semester) VALUES (?, ?)", (name, semester))
-            conn.commit()
-            flash(f"Successfully added subject '{name}'.", "success")
-        
-        conn.close()
-        return redirect(url_for("subjects"))
-
-    return render_template("add_subject.html")
-
-@app.route("/dashboard")
-def dashboard():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
-    student_id = session["user_id"]
-
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("""
-        SELECT s.name, s.semester, a.attended_classes, a.total_classes
-        FROM attendance a
-        JOIN subjects s ON a.subject_id = s.id
-        WHERE a.student_id = ?
-    """, (student_id,))
-    attendance_records = c.fetchall()
-    conn.close()
-
-    return render_template("dashboard.html", attendance=attendance_records)
-
-# Activity log
-def log_action(user_email, action):
-    conn = get_db_connection()
-    c = conn.cursor()
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    c.execute("INSERT INTO logs (user_email, action, timestamp) VALUES (?, ?, ?)",
-              (user_email, action, timestamp))
-    conn.commit()
-    conn.close()
-
-@app.route("/logs")
-def view_logs():
-    if not session.get("is_admin"):
-        return "Unauthorized", 403
-
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("SELECT user_email, action, timestamp FROM logs ORDER BY id DESC")
-    logs = c.fetchall()
-    conn.close()
-    return render_template("view_logs.html", logs=logs)
-
+# ==========================================
+# CORE ROUTES
+# ==========================================
 @app.route("/")
 def home():
     return render_template("index.html")
@@ -225,17 +192,129 @@ def register():
     
     return render_template("register.html")
 
+# ==========================================
+# CGPA TRACKER ROUTES
+# ==========================================
+@app.route("/cgpa")
+def view_cgpa():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+        
+    user_id = session["user_id"]
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT id, semester_number, credits, sgpa FROM cgpa_records WHERE user_id = ? ORDER BY semester_number", (user_id,))
+    records = c.fetchall()
+    
+    semesters = [{"id": r[0], "semester_number": r[1], "credits": r[2], "sgpa": r[3]} for r in records]
+    
+    total_credits = sum(s["credits"] for s in semesters)
+    weighted_sum = sum(s["credits"] * s["sgpa"] for s in semesters)
+    overall_cgpa = f"{(weighted_sum / total_credits):.2f}" if total_credits > 0 else "0.00"
+    
+    conn.close()
+    return render_template("cgpa.html", semesters=semesters, overall_cgpa=overall_cgpa, total_credits=total_credits)
+
+@app.route("/cgpa/add", methods=["GET", "POST"])
+def add_cgpa():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+        
+    if request.method == "POST":
+        semester_number = request.form["semester_number"]
+        credits = request.form["credits"]
+        sgpa = request.form["sgpa"]
+        
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("INSERT INTO cgpa_records (user_id, semester_number, credits, sgpa) VALUES (?, ?, ?, ?)",
+                  (session["user_id"], semester_number, credits, sgpa))
+        conn.commit()
+        conn.close()
+        return redirect(url_for("view_cgpa"))
+        
+    return render_template("add_cgpa.html")
+
+@app.route("/cgpa/delete/<int:record_id>")
+def delete_cgpa(record_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+        
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("DELETE FROM cgpa_records WHERE id = ? AND user_id = ?", (record_id, session["user_id"]))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("view_cgpa"))
+
+# ==========================================
+# CREDITS TRACKER ROUTES
+# ==========================================
+@app.route("/credits")
+def view_credits():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+        
+    user_id = session["user_id"]
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT id, course_code, course_name, credits, grade, semester FROM credit_history WHERE user_id = ? ORDER BY semester, course_code", (user_id,))
+    records = c.fetchall()
+    
+    credit_history = [{"id": r[0], "course_code": r[1], "course_name": r[2], "credits": r[3], "grade": r[4], "semester": r[5]} for r in records]
+    
+    total_credits = sum(r["credits"] for r in credit_history)
+    completion_percentage = round((total_credits / 160) * 100) if total_credits > 0 else 0
+    
+    conn.close()
+    return render_template("credits.html", credit_history=credit_history, total_credits=total_credits, completion_percentage=completion_percentage)
+
+@app.route("/credits/add", methods=["GET", "POST"])
+def add_credits():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+        
+    if request.method == "POST":
+        course_code = request.form["course_code"]
+        course_name = request.form["course_name"]
+        credits = request.form["credits"]
+        grade = request.form["grade"]
+        semester = request.form["semester"]
+        
+        conn = get_db_connection()
+        c = conn.cursor()
+        c.execute("INSERT INTO credit_history (user_id, course_code, course_name, credits, grade, semester) VALUES (?, ?, ?, ?, ?, ?)",
+                  (session["user_id"], course_code, course_name, credits, grade, semester))
+        conn.commit()
+        conn.close()
+        return redirect(url_for("view_credits"))
+        
+    return render_template("add_credits.html")
+    
+@app.route("/credits/delete/<int:record_id>")
+def delete_credit(record_id):
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+        
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("DELETE FROM credit_history WHERE id = ? AND user_id = ?", (record_id, session["user_id"]))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("view_credits"))
+
+# ==========================================
+# RESOURCE ROUTES (Courses, Papers, Notes)
+# ==========================================
 @app.route("/courses")
 def courses():
     search_query = request.args.get("q", "")
     conn = get_db_connection()
     c = conn.cursor()
-    
     if search_query:
         c.execute("SELECT * FROM courses WHERE name LIKE ?", ('%' + search_query + '%',))
     else:
         c.execute("SELECT * FROM courses")
-        
     courses = c.fetchall()
     conn.close()
     return render_template("courses.html", courses=courses, query=search_query)
@@ -364,30 +443,6 @@ def delete_paper(paper_id):
     conn.close()
     return redirect("/papers")
 
-@app.route("/users")
-def view_users():
-    if not session.get("is_admin"):
-        return "Unauthorized", 403
-
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("SELECT id, email, is_admin FROM users")
-    users = c.fetchall()
-    conn.close()
-    return render_template("view_users.html", users=users)
-
-@app.route("/delete_user/<int:user_id>")
-def delete_user(user_id):
-    if not session.get("is_admin"):
-        return "Unauthorized", 403
-    conn = get_db_connection()
-    c = conn.cursor()
-    c.execute("DELETE FROM users WHERE id = ?", (user_id,))
-    conn.commit()
-    conn.close()
-    return redirect(url_for("view_users"))
-
-
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -481,6 +536,126 @@ def download_notes(note_id):
             download_name=nice_name
         )
     return "File not found", 404
+
+# ==========================================
+# SYSTEM / LOGS / AUTH ROUTES
+# ==========================================
+def log_action(user_email, action):
+    conn = get_db_connection()
+    c = conn.cursor()
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    c.execute("INSERT INTO logs (user_email, action, timestamp) VALUES (?, ?, ?)",
+              (user_email, action, timestamp))
+    conn.commit()
+    conn.close()
+
+@app.route("/logs")
+def view_logs():
+    if not session.get("is_admin"):
+        return "Unauthorized", 403
+
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT user_email, action, timestamp FROM logs ORDER BY id DESC")
+    logs = c.fetchall()
+    conn.close()
+    return render_template("view_logs.html", logs=logs)
+
+@app.route("/users")
+def view_users():
+    if not session.get("is_admin"):
+        return "Unauthorized", 403
+
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT id, email, is_admin FROM users")
+    users = c.fetchall()
+    conn.close()
+    return render_template("view_users.html", users=users)
+
+@app.route("/delete_user/<int:user_id>")
+def delete_user(user_id):
+    if not session.get("is_admin"):
+        return "Unauthorized", 403
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("view_users"))
+
+# ==========================================
+# FINANCE TRACKER ROUTES
+# ==========================================
+@app.route('/finance')
+def finance():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+        
+    user_id = session["user_id"]
+    conn = get_db_connection()
+    c = conn.cursor()
+    
+    # Get the official fee structure
+    c.execute("SELECT semester, admission_fee, campus_fee, course_fee, total_fee FROM fee_structure ORDER BY semester")
+    fee_structure = c.fetchall()
+    
+    # Get the current user's payment status
+    c.execute("SELECT semester, status FROM student_payments WHERE user_id=?", (user_id,))
+    payments = {row[0]: row[1] for row in c.fetchall()}
+    
+    finance_data = []
+    total_paid = 0
+    total_due = 0
+    
+    for fee in fee_structure:
+        sem = fee[0]
+        status = payments.get(sem, 'Not Paid')
+        total = fee[4]
+        
+        if status == 'Paid':
+            total_paid += total
+        else:
+            total_due += total
+            
+        finance_data.append({
+            'semester': sem,
+            'admission_fee': fee[1],
+            'campus_fee': fee[2],
+            'course_fee': fee[3],
+            'total_fee': total,
+            'status': status
+        })
+        
+    conn.close()
+    return render_template('finance.html', finance_data=finance_data, total_paid=total_paid, total_due=total_due)
+
+@app.route('/finance/toggle', methods=['POST'])
+def toggle_payment():
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+        
+    user_id = session["user_id"]
+    semester = request.form.get('semester')
+    status = request.form.get('status')
+    
+    conn = get_db_connection()
+    c = conn.cursor()
+    
+    # Check if a payment record already exists for this semester
+    c.execute("SELECT id FROM student_payments WHERE user_id=? AND semester=?", (user_id, semester))
+    record = c.fetchone()
+    
+    if record:
+        c.execute("UPDATE student_payments SET status=? WHERE id=?", (status, record[0]))
+    else:
+        c.execute("INSERT INTO student_payments (user_id, semester, status) VALUES (?, ?, ?)", (user_id, semester, status))
+        
+    conn.commit()
+    conn.close()
+    
+    return redirect(url_for('finance'))
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))

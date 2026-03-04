@@ -1,29 +1,32 @@
 {% extends "base.html" %}
 
-{% block title %}Student Academic Archive | Excellence in Learning{% endblock %}
+{% block title %}Home | Academic Archive{% endblock %}
 
 {% block content %}
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
 <style>
     :root {
-        --primary: #2563eb;
-        --primary-dark: #1d4ed8;
-        --accent: #f59e0b;
+        --primary: #8b5cf6; /* Violet 500 */
+        --primary-dark: #7c3aed; /* Violet 600 */
+        --primary-light: #ede9fe; /* Violet 100 */
     }
     
-    .mesh-gradient {
-        background-color: #f8fafc;
+    /* Smooth purple mesh gradient for the banner */
+    .mesh-gradient-purple {
+        background-color: #8b5cf6;
         background-image: 
-            radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%),
-            radial-gradient(at 100% 0%, rgba(147, 51, 234, 0.05) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%),
-            radial-gradient(at 0% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+            radial-gradient(at 0% 0%, rgba(167, 139, 250, 0.8) 0px, transparent 50%),
+            radial-gradient(at 100% 0%, rgba(124, 58, 237, 0.8) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.9) 0px, transparent 50%),
+            radial-gradient(at 0% 100%, rgba(196, 181, 253, 0.8) 0px, transparent 50%);
     }
 
     .glass-card {
-        background: rgba(255, 255, 255, 0.8);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
     }
 
     .hover-lift {
@@ -32,240 +35,283 @@
 
     .hover-lift:hover {
         transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        box-shadow: 0 20px 25px -5px rgba(139, 92, 246, 0.1), 0 8px 10px -6px rgba(139, 92, 246, 0.05);
+        border-color: var(--primary-light);
     }
 
-    /* Custom scroll behavior */
-    html {
-        scroll-behavior: smooth;
+    /* Custom Scrollbar for inner areas */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
     }
 </style>
 
-<body class="mesh-gradient text-slate-900 font-sans selection:bg-blue-100">
+<div class="flex h-screen overflow-hidden bg-slate-50 text-slate-900 font-sans selection:bg-violet-100 selection:text-violet-900">
 
-    <div class="flex flex-col min-h-screen">
-        <!-- Modern Navigation -->
-        <nav class="sticky top-0 z-50 bg-white/70 backdrop-blur-md border-b border-slate-200">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-20">
-                    <div class="flex-shrink-0">
-                        <a href="/" class="flex items-center gap-3 group">
-                            <div class="bg-blue-600 p-2 rounded-xl group-hover:rotate-6 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/>
-                                </svg>
-                            </div>
-                            <span class="text-xl font-bold tracking-tight text-slate-800">Academic<span class="text-blue-600">Archive</span></span>
-                        </a>
-                    </div>
-
-                    <div class="flex items-center gap-6">
-                        {% if session.user_id %}
-                            <div class="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-100 rounded-full border border-slate-200">
-                                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                                    {{ "Administrator" if session.is_admin else "Student Access" }}
-                                </span>
-                            </div>
-                            <a href="/logout" class="text-sm font-semibold text-slate-600 hover:text-red-600 transition-colors">
-                                Sign Out
-                            </a>
-                        {% else %}
-                            <a href="/login" class="px-6 py-2.5 text-sm font-bold bg-slate-900 text-white rounded-full hover:bg-slate-800 transition-all shadow-lg shadow-slate-200">
-                                Member Login
-                            </a>
-                        {% endif %}
-                    </div>
+    <aside class="hidden lg:flex flex-col w-64 bg-white border-r border-slate-200 z-20">
+        <div class="h-20 flex items-center px-6 border-b border-slate-100">
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="bg-violet-600 p-2 rounded-xl group-hover:rotate-6 transition-transform shadow-lg shadow-violet-200">
+                    <i class="ph ph-hexagon-fill text-white text-xl"></i>
                 </div>
-            </div>
+                <span class="text-xl font-bold tracking-tight text-slate-800">জ্ঞান <span class="text-violet-600">উদয়</span></span>
+            </a>
+        </div>
+
+        <nav class="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-1">
+            <p class="px-4 text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Main Menu</p>
+            
+            <a href="/" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-violet-50 text-violet-700 font-semibold transition-colors">
+                <i class="ph ph-house text-xl"></i> Home
+            </a>
+            
+            <a href="/cgpa" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                <i class="ph ph-trend-up text-xl"></i> My CGPA
+            </a>
+            <a href="/credits" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                <i class="ph ph-medal text-xl"></i> My Credits
+            </a>
+            
+            <a href="/courses" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                <i class="ph ph-books text-xl"></i> My Courses
+            </a>
+            <a href="/papers" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                <i class="ph ph-file-text text-xl"></i> Question Papers
+            </a>
+            <a href="/notes" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                <i class="ph ph-notebook text-xl"></i> Community Notes
+            </a>
+            <a href="/finance" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                <i class="ph ph-wallet text-xl"></i> Finance
+            </a>
+            
+            {% if session.get("is_admin") %}
+            <p class="px-4 text-xs font-bold uppercase tracking-wider text-slate-400 mt-6 mb-2">Administration</p>
+            <a href="/users" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                <i class="ph ph-users text-xl"></i> User Management
+            </a>
+            <a href="/logs" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                <i class="ph ph-chart-line-up text-xl"></i> System Logs
+            </a>
+            {% endif %}
         </nav>
 
-        <main class="flex-grow">
-            <!-- Hero Section -->
-            <section class="relative pt-12 pb-20 overflow-hidden">
-                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="max-w-4xl mx-auto text-center">
-                        <span class="inline-block px-4 py-1.5 mb-6 text-sm font-bold tracking-widest text-blue-700 uppercase bg-blue-50 rounded-full border border-blue-100">
-                            Knowledge Repository 2.0
-                        </span>
-                        <h1 class="text-5xl md:text-7xl font-black text-slate-900 leading-[1.1] tracking-tight mb-8">
-                            Master your studies with <span class="text-blue-600">curated resources.</span>
-                        </h1>
-                        <p class="text-xl text-slate-600 max-w-2xl mx-auto mb-10 leading-relaxed">
-                            A centralized hub for premium course materials, archived question papers, and community notes designed to help students achieve academic excellence.
-                        </p>
-                        <div class="flex flex-col sm:flex-row justify-center gap-4">
-                            <a href="#resources" class="px-8 py-4 text-lg font-bold bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-2">
-                                Start Learning
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
-                            </a>
-                            <a href="/dashboard" class="px-8 py-4 text-lg font-bold bg-white text-slate-700 border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center gap-2">
-                                View Dashboard
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </section>
+        <div class="p-4 border-t border-slate-100">
+            <a href="/settings" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
+                <i class="ph ph-gear text-xl"></i> Settings
+            </a>
+            <a href="/logout" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 font-medium transition-colors mt-1">
+                <i class="ph ph-sign-out text-xl"></i> Sign Out
+            </a>
+        </div>
+    </aside>
 
-            <!-- Resource Bento Grid -->
-            <section id="resources" class="py-20">
-                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
-                        <div class="max-w-xl">
-                            <h2 class="text-3xl font-bold text-slate-900 mb-4">Academic Catalog</h2>
-                            <p class="text-slate-500">Structured resources categorized for efficient exam preparation and conceptual understanding.</p>
-                        </div>
-                    </div>
+    <div class="flex-1 flex flex-col min-w-0">
+        
+        <header class="h-20 bg-white/70 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10 flex items-center justify-between px-6 lg:px-10">
+            <button class="lg:hidden text-slate-500 hover:text-violet-600 transition-colors">
+                <i class="ph ph-list text-2xl"></i>
+            </button>
 
-                    <div class="grid grid-cols-1 md:grid-cols-6 gap-6">
-                        <!-- Primary Card: Courses -->
-                        <a href="/courses" class="md:col-span-3 group relative overflow-hidden glass-card p-8 rounded-[2rem] hover-lift">
-                            <div class="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-32 w-32" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                            </div>
-                            <div class="bg-blue-600 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18" /></svg>
-                            </div>
-                            <h3 class="text-2xl font-bold text-slate-900 mb-2">Video Courses</h3>
-                            <p class="text-slate-600 mb-6">Expert-led lectures and comprehensive syllabi for core modules.</p>
-                            <span class="text-blue-600 font-bold inline-flex items-center gap-2">
-                                Browse Library <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                            </span>
-                        </a>
-
-                        <!-- Secondary Card: Question Papers -->
-                        <a href="/papers" class="md:col-span-3 glass-card p-8 rounded-[2rem] hover-lift group">
-                            <div class="bg-emerald-500 w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-emerald-200">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </div>
-                            <h3 class="text-2xl font-bold text-slate-900 mb-2">Question Papers</h3>
-                            <p class="text-slate-600 mb-6">Solve previous years' exams to master timing and question patterns.</p>
-                            <span class="text-emerald-600 font-bold inline-flex items-center gap-2">
-                                Access Archives <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
-                            </span>
-                        </a>
-
-                        <!-- Small Card: Notes -->
-                        <a href="/notes" class="md:col-span-2 glass-card p-6 rounded-[2rem] hover-lift group border-t-4 border-t-purple-500">
-                            <div class="bg-purple-100 text-purple-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                            </div>
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Community Notes</h4>
-                            <p class="text-sm text-slate-500">Peer-reviewed summaries and study guides.</p>
-                        </a>
-
-                        <!-- Small Card: Dashboard -->
-                        <a href="/dashboard" class="md:col-span-2 glass-card p-6 rounded-[2rem] hover-lift group border-t-4 border-t-orange-500">
-                            <div class="bg-orange-100 text-orange-600 w-12 h-12 rounded-xl flex items-center justify-center mb-4">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                            </div>
-                            <h4 class="text-xl font-bold text-slate-900 mb-2">Student Dashboard</h4>
-                            <p class="text-sm text-slate-500">Personalized progress and attendance tracking.</p>
-                        </a>
-
-                        <!-- Small Card: New Additions -->
-                        <div class="md:col-span-2 bg-slate-900 text-white p-6 rounded-[2rem] hover-lift flex flex-col justify-center">
-                            <p class="text-blue-400 font-bold text-sm mb-1">New this week</p>
-                            <h4 class="text-xl font-bold mb-4">Deep Learning 101</h4>
-                            <div class="mt-auto flex items-center gap-2">
-                                <div class="flex -space-x-2">
-                                    <div class="w-8 h-8 rounded-full bg-slate-700 border-2 border-slate-900 flex items-center justify-center text-[10px]">JD</div>
-                                    <div class="w-8 h-8 rounded-full bg-blue-600 border-2 border-slate-900 flex items-center justify-center text-[10px]">AS</div>
-                                </div>
-                                <span class="text-xs text-slate-400">+12 added resources</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Admin Activity Feed (Conditional) -->
-            {% if session.get("is_admin") %}
-            <section class="py-20 bg-slate-50">
-                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="bg-white rounded-[2.5rem] border border-slate-200 p-8 md:p-12 shadow-sm">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
-                            <div>
-                                <h2 class="text-3xl font-bold text-slate-900 mb-2">Administrative Control</h2>
-                                <p class="text-slate-500">Oversee ecosystem health and user engagement.</p>
-                            </div>
-                            <div class="flex gap-3">
-                                <a href="/logs" class="px-5 py-2.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                                    View Logs
-                                </a>
-                                <a href="/users" class="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                                    Manage Users
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Mini Stats for Admin -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                <span class="text-slate-500 text-sm font-bold uppercase tracking-wider">Active Users</span>
-                                <div class="flex items-baseline gap-2 mt-2">
-                                    <span class="text-3xl font-black text-slate-900">1,284</span>
-                                    <span class="text-green-600 text-xs font-bold">+12%</span>
-                                </div>
-                            </div>
-                            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                <span class="text-slate-500 text-sm font-bold uppercase tracking-wider">Resource Downloads</span>
-                                <div class="flex items-baseline gap-2 mt-2">
-                                    <span class="text-3xl font-black text-slate-900">42.5k</span>
-                                    <span class="text-blue-600 text-xs font-bold">New Record</span>
-                                </div>
-                            </div>
-                            <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                <span class="text-slate-500 text-sm font-bold uppercase tracking-wider">System Status</span>
-                                <div class="flex items-center gap-2 mt-2">
-                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                                    <span class="text-xl font-bold text-slate-900">All Systems Go</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            {% endif %}
-        </main>
-
-        <!-- Minimal Footer -->
-        <footer class="bg-white border-t border-slate-200 pt-16 pb-8">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
-                    <div class="flex items-center gap-3">
-                        <div class="bg-slate-900 p-2 rounded-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18" /><path d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/></svg>
-                        </div>
-                        <span class="font-bold text-slate-900">Academic Archive</span>
-                    </div>
-                    <div class="flex gap-8 text-sm font-bold text-slate-500 uppercase tracking-widest">
-                        <a href="#" class="hover:text-blue-600 transition-colors">Documentation</a>
-                        <a href="#" class="hover:text-blue-600 transition-colors">Privacy</a>
-                        <a href="#" class="hover:text-blue-600 transition-colors">Support</a>
-                    </div>
-                </div>
-                <div class="text-center text-slate-400 text-sm">
-                     &copy; <span id="current-year"></span> Student Academic Archive. Built for learners.
-                </div>
+            <div class="hidden md:flex items-center bg-slate-100 rounded-full px-4 py-2 w-96 border border-transparent focus-within:border-violet-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-violet-50 transition-all">
+                <i class="ph ph-magnifying-glass text-slate-400 text-lg"></i>
+                <input type="text" placeholder="Search resources, peers, or courses..." class="bg-transparent border-none outline-none w-full ml-3 text-sm text-slate-700 placeholder-slate-400">
             </div>
-        </footer>
+
+            <div class="flex items-center gap-5 ml-auto">
+                {% if session.user_id %}
+                    <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-violet-50 rounded-full border border-violet-100">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-xs font-semibold text-violet-700 uppercase tracking-wider">
+                            {{ "Administrator" if session.is_admin else "Student Access" }}
+                        </span>
+                    </div>
+                {% endif %}
+
+                <button class="relative text-slate-400 hover:text-violet-600 transition-colors">
+                    <i class="ph ph-bell text-2xl"></i>
+                    <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
+                </button>
+                
+                <div class="h-8 w-px bg-slate-200 mx-1"></div>
+
+                {% if session.email %}
+                    <div class="flex items-center gap-3 cursor-pointer group">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-sm font-bold text-slate-700 group-hover:text-violet-600 transition-colors">{{ session.email.split('@')[0] }}</p>
+                            <p class="text-xs text-slate-400 font-medium">Computer Science</p>
+                        </div>
+                        <img src="https://ui-avatars.com/api/?name={{ session.email.split('@')[0] }}&background=8b5cf6&color=fff&rounded=true" alt="Profile" class="w-10 h-10 rounded-full border-2 border-slate-200 group-hover:border-violet-400 transition-colors">
+                    </div>
+                {% else %}
+                    <a href="/login" class="flex items-center gap-3 cursor-pointer group transition-transform hover:scale-105 active:scale-95">
+                        <div class="text-right hidden sm:block">
+                            <p class="text-sm font-bold text-violet-600 group-hover:text-violet-700 transition-colors">Sign In</p>
+                            <p class="text-xs text-slate-400 font-medium">Computer Science</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-violet-500 text-white flex items-center justify-center font-medium border-2 border-white ring-2 ring-violet-200 transition-all group-hover:ring-violet-400 shadow-sm">
+                            US
+                        </div>
+                    </a>
+                {% endif %}
+
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-6 lg:p-8">
+            <div class="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8">
+                
+                <div class="flex-1 flex flex-col gap-8">
+                    
+                    <div class="mesh-gradient-purple rounded-[2rem] p-8 md:p-10 text-white shadow-lg shadow-violet-200 relative overflow-hidden flex items-center justify-between">
+                        <div class="relative z-10 max-w-xl">
+                            <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold tracking-wider uppercase mb-4 border border-white/20">Fall Semester 2026</span>
+                            <h1 class="text-3xl md:text-4xl font-bold mb-3 tracking-tight">Welcome back, {{ session.email.split('@')[0] | capitalize if session.email else "Student" }}! 👋</h1>
+                            <p class="text-violet-100 text-sm md:text-base leading-relaxed">You have 2 pending assignments due this week. Keep up the good work!</p>
+                        </div>
+                        <div class="hidden md:block absolute -right-10 -bottom-20 opacity-30">
+                            <i class="ph-fill ph-student" style="font-size: 18rem;"></i>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-xl font-bold text-slate-800">Academic Overview</h2>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            
+                            <a href="/cgpa" class="glass-card p-6 rounded-2xl hover-lift block group">
+                                <div class="w-12 h-12 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <i class="ph ph-trend-up text-2xl"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Current CGPA</p>
+                                <div class="flex items-end justify-between mt-1">
+                                    <div class="flex items-end gap-2">
+                                        <h3 class="text-3xl font-black text-slate-800">{{ overall_cgpa | default("0.00", true) }}</h3>
+                                    </div>
+                                    <i class="ph-bold ph-arrow-up-right text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                </div>
+                            </a>
+                            
+                            <a href="/credits" class="glass-card p-6 rounded-2xl hover-lift block group">
+                                <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <i class="ph ph-medal text-2xl"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Credits Earned</p>
+                                <div class="flex items-end justify-between mt-1">
+                                    <div class="flex items-end gap-2">
+                                        <h3 class="text-3xl font-black text-slate-800">{{ total_credits | default("0", true) }}</h3>
+                                        <span class="text-sm font-bold text-slate-400 mb-1">/ 160</span>
+                                    </div>
+                                    <i class="ph-bold ph-arrow-up-right text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                </div>
+                            </a>
+
+                            <a href="/finance" class="glass-card p-6 rounded-2xl hover-lift block group">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                    <i class="ph ph-wallet text-2xl"></i>
+                                </div>
+                                <p class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Fee Balance</p>
+                                <div class="flex items-end justify-between mt-1">
+                                    <div class="flex items-end gap-2">
+                                        <h3 class="text-3xl font-black text-slate-800">$0.00</h3>
+                                    </div>
+                                    <span class="text-sm font-bold text-emerald-500 mb-1">Fully Paid</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="w-full xl:w-80 flex flex-col gap-8 shrink-0">
+                    
+                    <div class="glass-card rounded-[2rem] p-6">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="bg-violet-100 p-2 rounded-lg text-violet-600">
+                                <i class="ph ph-megaphone-simple text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-800">Notice Board</h3>
+                        </div>
+
+                        <div class="flex flex-col gap-5">
+                            <div class="relative pl-4 border-l-2 border-violet-500">
+                                <span class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-violet-500 ring-4 ring-white"></span>
+                                <span class="text-xs font-bold text-violet-600 mb-1 block">Today, 09:00 AM</span>
+                                <h5 class="text-sm font-bold text-slate-800 mb-1">Mid-term Schedule Released</h5>
+                                <p class="text-xs text-slate-500 leading-relaxed">The examination branch has published the updated schedule for upcoming mid-terms.</p>
+                            </div>
+
+                            <div class="relative pl-4 border-l-2 border-orange-400">
+                                <span class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-orange-400 ring-4 ring-white"></span>
+                                <span class="text-xs font-bold text-orange-500 mb-1 block">Yesterday, 02:30 PM</span>
+                                <h5 class="text-sm font-bold text-slate-800 mb-1">Library Fine Deadline</h5>
+                                <p class="text-xs text-slate-500 leading-relaxed">Please clear all outstanding library dues before the end of the week to avoid portal block.</p>
+                            </div>
+
+                            <div class="relative pl-4 border-l-2 border-slate-200">
+                                <span class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-slate-300 ring-4 ring-white"></span>
+                                <span class="text-xs font-bold text-slate-400 mb-1 block">Mar 12, 10:00 AM</span>
+                                <h5 class="text-sm font-bold text-slate-800 mb-1">Tech Symposium 2026</h5>
+                                <p class="text-xs text-slate-500 leading-relaxed">Registrations are now open for the annual computer science hackathon. Team sizes: 3-4.</p>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full mt-6 py-2.5 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">
+                            View All Notices
+                        </button>
+                    </div>
+
+                    <div class="glass-card rounded-[2rem] p-6 bg-slate-900 text-white shadow-xl shadow-slate-200/50">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="ph ph-calendar-check text-violet-400"></i> Upcoming
+                        </h3>
+                        <div class="bg-white/10 rounded-xl p-4 mb-3 border border-white/5">
+                            <div class="flex items-center gap-4">
+                                <div class="bg-violet-500 text-white rounded-lg p-2 text-center min-w-[3rem]">
+                                    <span class="block text-xs font-bold uppercase">Oct</span>
+                                    <span class="block text-lg font-black">24</span>
+                                </div>
+                                <div>
+                                    <h5 class="font-bold text-sm mb-0.5">Project Submission</h5>
+                                    <p class="text-xs text-slate-300">Advanced Data Structures</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            
+            <footer class="mt-12 py-6 border-t border-slate-200 text-center text-sm font-medium text-slate-400">
+                &copy; <span id="current-year"></span> Academic Archive HQ. Built for modern learners.
+            </footer>
+        </main>
     </div>
+</div>
 
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-    <script>
-        document.getElementById('current-year').textContent = new Date().getFullYear();
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        const userEmail = "{{ session.email | default('', true) }}";
-        if (userEmail) {
-            const socket = io();
-            socket.on("connect", () => socket.emit("join", { email: userEmail }));
-            window.addEventListener("beforeunload", () => socket.emit("leave", {}));
-            socket.on("update_users", (onlineList) => console.log("Live activity:", onlineList.length, "users online"));
-        }
-    </script>
-</body>
+    // Keeping your original socket logic intact
+    const userEmail = "{{ session.email | default('', true) }}";
+    if (userEmail) {
+        const socket = io();
+        socket.on("connect", () => socket.emit("join", { email: userEmail }));
+        window.addEventListener("beforeunload", () => socket.emit("leave", {}));
+        socket.on("update_users", (onlineList) => console.log("Live activity:", onlineList.length, "users online"));
+    }
+</script>
+
 {% endblock %}
