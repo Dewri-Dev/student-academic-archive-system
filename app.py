@@ -106,9 +106,35 @@ def init_db():
             status TEXT DEFAULT 'Not Paid',
             FOREIGN KEY(user_id) REFERENCES users(id)
         );
+        
+        -- CHANGED: Use double dashes for SQL comments instead of '#'
+        -- NEW TABLE FOR HOLIDAYS --
+        CREATE TABLE IF NOT EXISTS holidays (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            holiday_date DATE NOT NULL,
+            name TEXT NOT NULL,
+            description TEXT,
+            type TEXT NOT NULL
+        );
     """)
     conn.commit()
     
+    # Pre-insert Assam 2026 Official Holidays if table is empty
+    c.execute("SELECT COUNT(*) FROM holidays")
+    if c.fetchone()[0] == 0:
+        default_holidays = [
+            ('2026-01-14', 'Magh Bihu & Tusu Puja', 'Harvest festival', 'State'),
+            ('2026-01-26', 'Republic Day', 'National holiday', 'National'),
+            ('2026-03-03', 'Dol Jatra', 'Festival of colors', 'State'),
+            ('2026-04-15', 'Bohag Bihu', 'Assamese New Year', 'State'),
+            ('2026-08-15', 'Independence Day', 'National holiday', 'National'),
+            ('2026-10-02', 'Gandhi Jayanti', 'Birthday of Mahatma Gandhi', 'National'),
+            ('2026-10-18', 'Durga Puja', 'Kati Bihu & Durga Puja', 'State'),
+            ('2026-12-25', 'Christmas Day', 'Christian festival', 'National')
+        ]
+        c.executemany("INSERT INTO holidays (holiday_date, name, description, type) VALUES (?, ?, ?, ?)", default_holidays)
+        conn.commit()
+        
     # Pre-insert default B.Tech Fee Structure from the provided image
     c.execute("SELECT COUNT(*) FROM fee_structure")
     if c.fetchone()[0] == 0:
@@ -135,13 +161,56 @@ def init_db():
     conn.close()
 
 init_db()
-
 # ==========================================
 # CORE ROUTES
 # ==========================================
 @app.route("/")
 def home():
-    return render_template("index.html")
+    conn = get_db_connection()
+    c = conn.cursor()
+    
+    # Get current date
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    # Upcoming holidays
+    c.execute("""
+        SELECT id, holiday_date, name, description, type 
+        FROM holidays 
+        WHERE holiday_date >= ? 
+        ORDER BY holiday_date ASC
+    """, (today,))
+    upcoming_raw = c.fetchall()
+    
+    # Past holidays
+    c.execute("""
+        SELECT id, holiday_date, name, description, type 
+        FROM holidays 
+        WHERE holiday_date < ? 
+        ORDER BY holiday_date DESC
+    """, (today,))
+    past_raw = c.fetchall()
+
+    conn.close()
+    
+    def process_holidays(h_list):
+        processed = []
+        for h in h_list:
+            d = datetime.strptime(h[1], '%Y-%m-%d')
+            processed.append({
+                "id": h[0],
+                "month": d.strftime('%b').upper(),
+                "day": d.strftime('%d'),
+                "name": h[2],
+                "description": h[3],
+                "type": h[4]
+            })
+        return processed
+
+    return render_template(
+        "index.html",
+        upcoming_holidays=process_holidays(upcoming_raw),
+        past_holidays=process_holidays(past_raw)
+    )
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -705,6 +774,52 @@ def edit_finance(semester):
         return "Semester not found", 404
         
     return render_template('edit_finance.html', fee=fee)
+
+# ==========================================
+# HOLIDAY MANAGEMENT ROUTES (Admin)
+# ==========================================
+@app.route("/holidays/manage")
+def manage_holidays():
+    if not session.get("is_admin"):
+        return redirect(url_for("home"))
+        
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT id, holiday_date, name, description, type FROM holidays ORDER BY holiday_date DESC")
+    holidays = c.fetchall()
+    conn.close()
+    
+    return render_template("manage_holidays.html", holidays=holidays)
+
+@app.route("/holidays/add", methods=["POST"])
+def add_holiday():
+    if not session.get("is_admin"):
+        return redirect(url_for("home"))
+        
+    date = request.form["date"]
+    name = request.form["name"]
+    desc = request.form["description"]
+    h_type = request.form["type"]
+    
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("INSERT INTO holidays (holiday_date, name, description, type) VALUES (?, ?, ?, ?)", 
+              (date, name, desc, h_type))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("manage_holidays"))
+
+@app.route("/holidays/delete/<int:h_id>")
+def delete_holiday(h_id):
+    if not session.get("is_admin"):
+        return redirect(url_for("home"))
+        
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("DELETE FROM holidays WHERE id=?", (h_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("manage_holidays"))
 
 
 if __name__ == "__main__":

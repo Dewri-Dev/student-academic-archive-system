@@ -39,35 +39,32 @@
         border-color: var(--primary-light);
     }
 
-    /* Custom Scrollbar for inner areas */
-    ::-webkit-scrollbar {
-        width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-    }
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+    /* Main Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 </style>
 
-<div class="flex h-screen overflow-hidden bg-slate-50 text-slate-900 font-sans selection:bg-violet-100 selection:text-violet-900 relative">
+<div class="flex h-screen overflow-hidden bg-slate-50 text-slate-900 font-sans selection:bg-violet-100 selection:text-violet-900 relative w-full">
 
-    <div id="mobile-overlay" class="absolute inset-0 bg-slate-900/40 z-40 hidden lg:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
+    <div id="mobile-overlay" class="fixed inset-0 bg-slate-900/40 z-[60] hidden lg:hidden backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
 
-    <aside id="sidebar" class="absolute lg:relative z-50 lg:z-20 flex flex-col w-64 bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out h-full shadow-2xl lg:shadow-none">
-        <div class="h-20 flex items-center justify-between px-6 border-b border-slate-100">
+    <aside id="sidebar" class="fixed inset-y-0 left-0 lg:static z-[70] lg:z-20 flex flex-col w-64 bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out h-full shadow-2xl lg:shadow-none">
+        <div class="h-20 flex items-center justify-between px-6 border-b border-slate-100 shrink-0">
             <a href="/" class="flex items-center gap-3 group">
                 <div class="bg-violet-600 p-2 rounded-xl group-hover:rotate-6 transition-transform shadow-lg shadow-violet-200">
                     <i class="ph ph-hexagon-fill text-white text-xl"></i>
                 </div>
                 <span class="text-xl font-bold tracking-tight text-slate-800">জ্ঞান <span class="text-violet-600">উদয়</span></span>
             </a>
-            <button id="close-sidebar-btn" class="lg:hidden text-slate-400 hover:text-rose-500 transition-colors">
+            <button id="close-sidebar-btn" class="lg:hidden text-slate-400 hover:text-rose-500 transition-colors p-2 -mr-2">
                 <i class="ph ph-x text-2xl"></i>
             </button>
         </div>
@@ -110,7 +107,7 @@
             {% endif %}
         </nav>
 
-        <div class="p-4 border-t border-slate-100">
+        <div class="p-4 border-t border-slate-100 shrink-0">
             <a href="/settings" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors">
                 <i class="ph ph-gear text-xl"></i> Settings
             </a>
@@ -122,12 +119,12 @@
 
     <div class="flex-1 flex flex-col min-w-0">
         
-        <header class="h-20 bg-white/70 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10 flex items-center justify-between px-6 lg:px-10">
-            <button id="mobile-menu-btn" class="lg:hidden text-slate-500 hover:text-violet-600 transition-colors">
-                <i class="ph ph-list text-2xl"></i>
+        <header class="h-20 shrink-0 bg-white/70 backdrop-blur-md border-b border-slate-200 sticky top-0 z-10 flex items-center justify-between px-4 lg:px-10">
+            <button id="mobile-menu-btn" class="lg:hidden text-slate-500 hover:text-violet-600 transition-colors p-2">
+                <i class="ph ph-list text-3xl"></i>
             </button>
 
-            <div class="hidden md:flex items-center bg-slate-100 rounded-full px-4 py-2 w-96 border border-transparent focus-within:border-violet-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-violet-50 transition-all">
+            <div class="hidden md:flex items-center bg-slate-100 rounded-full px-4 py-2 w-96 border border-transparent focus-within:border-violet-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-violet-50 transition-all ml-4">
                 <i class="ph ph-magnifying-glass text-slate-400 text-lg"></i>
                 <input type="text" placeholder="Search resources, peers, or courses..." class="bg-transparent border-none outline-none w-full ml-3 text-sm text-slate-700 placeholder-slate-400">
             </div>
@@ -142,12 +139,12 @@
                     </div>
                 {% endif %}
 
-                <button class="relative text-slate-400 hover:text-violet-600 transition-colors">
+                <button class="relative text-slate-400 hover:text-violet-600 transition-colors hidden sm:block">
                     <i class="ph ph-bell text-2xl"></i>
                     <span class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-500 border-2 border-white rounded-full"></span>
                 </button>
                 
-                <div class="h-8 w-px bg-slate-200 mx-1"></div>
+                <div class="h-8 w-px bg-slate-200 mx-1 hidden sm:block"></div>
 
                 {% if session.email %}
                     <div class="flex items-center gap-3 cursor-pointer group">
@@ -172,7 +169,7 @@
             </div>
         </header>
 
-        <main class="flex-1 overflow-y-auto p-6 lg:p-8">
+        <main class="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
             <div class="max-w-[1600px] mx-auto flex flex-col xl:flex-row gap-8">
                 
                 <div class="flex-1 flex flex-col gap-8">
@@ -183,7 +180,7 @@
                             <h1 class="text-3xl md:text-4xl font-bold mb-3 tracking-tight">Welcome back, {{ session.email.split('@')[0] | capitalize if session.email else "Student" }}! 👋</h1>
                             <p class="text-violet-100 text-sm md:text-base leading-relaxed">You have 2 pending assignments due this week. Keep up the good work!</p>
                         </div>
-                        <div class="hidden md:block absolute -right-10 -bottom-20 opacity-30">
+                        <div class="hidden md:block absolute -right-10 -bottom-20 opacity-30 pointer-events-none">
                             <i class="ph-fill ph-student" style="font-size: 18rem;"></i>
                         </div>
                     </div>
@@ -192,7 +189,7 @@
                         <div class="flex items-center justify-between mb-4">
                             <h2 class="text-xl font-bold text-slate-800">Academic Overview</h2>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             
                             <a href="/cgpa" class="glass-card p-6 rounded-2xl hover-lift block group">
                                 <div class="w-12 h-12 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -253,21 +250,14 @@
                                 <span class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-violet-500 ring-4 ring-white"></span>
                                 <span class="text-xs font-bold text-violet-600 mb-1 block">Today, 09:00 AM</span>
                                 <h5 class="text-sm font-bold text-slate-800 mb-1">Mid-term Schedule Released</h5>
-                                <p class="text-xs text-slate-500 leading-relaxed">The examination branch has published the updated schedule for upcoming mid-terms.</p>
+                                <p class="text-xs text-slate-500 leading-relaxed">The examination branch has published the updated schedule.</p>
                             </div>
 
                             <div class="relative pl-4 border-l-2 border-orange-400">
                                 <span class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-orange-400 ring-4 ring-white"></span>
                                 <span class="text-xs font-bold text-orange-500 mb-1 block">Yesterday, 02:30 PM</span>
                                 <h5 class="text-sm font-bold text-slate-800 mb-1">Library Fine Deadline</h5>
-                                <p class="text-xs text-slate-500 leading-relaxed">Please clear all outstanding library dues before the end of the week to avoid portal block.</p>
-                            </div>
-
-                            <div class="relative pl-4 border-l-2 border-slate-200">
-                                <span class="absolute -left-[5px] top-1 w-2 h-2 rounded-full bg-slate-300 ring-4 ring-white"></span>
-                                <span class="text-xs font-bold text-slate-400 mb-1 block">Mar 12, 10:00 AM</span>
-                                <h5 class="text-sm font-bold text-slate-800 mb-1">Tech Symposium 2026</h5>
-                                <p class="text-xs text-slate-500 leading-relaxed">Registrations are now open for the annual computer science hackathon. Team sizes: 3-4.</p>
+                                <p class="text-xs text-slate-500 leading-relaxed">Please clear all outstanding library dues before the end of the week.</p>
                             </div>
                         </div>
                         
@@ -276,21 +266,76 @@
                         </button>
                     </div>
 
-                    <div class="glass-card rounded-[2rem] p-6 bg-slate-900 text-white shadow-xl shadow-slate-200/50">
-                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                            <i class="ph ph-calendar-check text-violet-400"></i> Upcoming
-                        </h3>
-                        <div class="bg-white/10 rounded-xl p-4 mb-3 border border-white/5">
-                            <div class="flex items-center gap-4">
-                                <div class="bg-violet-500 text-white rounded-lg p-2 text-center min-w-[3rem]">
-                                    <span class="block text-xs font-bold uppercase">Oct</span>
-                                    <span class="block text-lg font-black">24</span>
-                                </div>
-                                <div>
-                                    <h5 class="font-bold text-sm mb-0.5">Project Submission</h5>
-                                    <p class="text-xs text-slate-300">Advanced Data Structures</p>
-                                </div>
+                    <div class="glass-card rounded-[2rem] p-6 bg-white shadow-xl shadow-slate-200/50 flex flex-col h-auto xl:max-h-[650px]">
+                        
+                        <div class="flex items-center justify-between mb-5 shrink-0">
+                            <h3 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <i class="ph ph-calendar-star text-violet-500"></i> Official Holidays
+                            </h3>
+                            {% if session.get("is_admin") %}
+                            <a href="/holidays/manage" class="text-sm font-bold text-violet-500 hover:text-violet-700 transition-colors">
+                                Manage
+                            </a>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-6 bg-slate-50/50 rounded-2xl p-4 border border-slate-100 shrink-0">
+                            <div class="flex justify-between items-center mb-3 px-1">
+                                <button id="prev-month" class="text-slate-400 hover:text-violet-600 transition-colors p-1"><i class="ph-bold ph-caret-left"></i></button>
+                                <h4 id="calendar-month-year" class="text-sm font-bold text-slate-700 uppercase tracking-widest">Month Year</h4>
+                                <button id="next-month" class="text-slate-400 hover:text-violet-600 transition-colors p-1"><i class="ph-bold ph-caret-right"></i></button>
                             </div>
+                            <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-slate-400 mb-2">
+                                <div>SU</div><div>MO</div><div>TU</div><div>WE</div><div>TH</div><div>FR</div><div>SA</div>
+                            </div>
+                            <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center text-xs font-medium text-slate-700">
+                                </div>
+                        </div>
+
+                        <div class="overflow-y-auto custom-scrollbar pr-2 flex-1">
+                            
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Upcoming</h4>
+                            <div class="flex flex-col gap-4 mb-8">
+                                {% if upcoming_holidays %}
+                                    {% for h in upcoming_holidays %}
+                                    <div class="flex items-center gap-4 group cursor-default">
+                                        <div class="bg-violet-500 text-white rounded-xl p-2 w-14 text-center shrink-0 shadow-sm shadow-violet-200 transition-transform group-hover:scale-105">
+                                            <span class="block text-[10px] font-bold uppercase tracking-wider mb-0.5">{{ h.month }}</span>
+                                            <span class="block text-xl font-black leading-none">{{ h.day }}</span>
+                                        </div>
+                                        <div class="min-w-0 flex-1 border-b border-slate-50 pb-2">
+                                            <h5 class="font-bold text-sm text-slate-800 truncate group-hover:text-violet-600 transition-colors">{{ h.name }}</h5>
+                                            <p class="text-xs text-slate-400 font-medium truncate">
+                                                {{ h.description if h.description else h.type }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-sm text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-slate-100">No upcoming holidays.</p>
+                                {% endif %}
+                            </div>
+
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Past</h4>
+                            <div class="flex flex-col gap-4 opacity-60">
+                                {% if past_holidays %}
+                                    {% for h in past_holidays %}
+                                    <div class="flex items-center gap-4 grayscale-[30%]">
+                                        <div class="bg-slate-200 text-slate-500 rounded-xl p-2 w-14 text-center shrink-0 border border-slate-300">
+                                            <span class="block text-[10px] font-bold uppercase tracking-wider mb-0.5">{{ h.month }}</span>
+                                            <span class="block text-xl font-black leading-none">{{ h.day }}</span>
+                                        </div>
+                                        <div class="min-w-0 flex-1 border-b border-slate-50 pb-2">
+                                            <h5 class="font-bold text-sm text-slate-500 line-through truncate">{{ h.name }}</h5>
+                                            <p class="text-xs text-slate-400 font-medium truncate">{{ h.type }}</p>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-sm text-slate-400 italic">No past holidays recorded.</p>
+                                {% endif %}
+                            </div>
+
                         </div>
                     </div>
 
@@ -307,42 +352,101 @@
 
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>
-    document.getElementById('current-year').textContent = new Date().getFullYear();
+    // Self-executing function so we don't wait for DOMContentLoaded 
+    // This fixes the frozen mobile button issue!
+    (function() {
+        // Set Year
+        const yearEl = document.getElementById('current-year');
+        if(yearEl) yearEl.textContent = new Date().getFullYear();
 
-    // Socket.io Logic
-    const userEmail = "{{ session.email | default('', true) }}";
-    if (userEmail) {
-        const socket = io();
-        socket.on("connect", () => socket.emit("join", { email: userEmail }));
-        window.addEventListener("beforeunload", () => socket.emit("leave", {}));
-        socket.on("update_users", (onlineList) => console.log("Live activity:", onlineList.length, "users online"));
-    }
+        // 1. Mobile Sidebar Toggle Logic
+        const mobileBtn = document.getElementById('mobile-menu-btn');
+        const closeBtn = document.getElementById('close-sidebar-btn');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
 
-    // Mobile Sidebar Toggle Logic
-    const mobileBtn = document.getElementById('mobile-menu-btn');
-    const closeBtn = document.getElementById('close-sidebar-btn');
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('mobile-overlay');
-
-    function toggleSidebar() {
-        const isClosed = sidebar.classList.contains('-translate-x-full');
-        
-        if (isClosed) {
-            // Open sidebar
-            sidebar.classList.remove('-translate-x-full');
-            overlay.classList.remove('hidden');
-            setTimeout(() => overlay.classList.remove('opacity-0'), 10); // Slight delay for CSS transition
-        } else {
-            // Close sidebar
-            sidebar.classList.add('-translate-x-full');
-            overlay.classList.add('opacity-0');
-            setTimeout(() => overlay.classList.add('hidden'), 300); // Wait for transition to finish
+        if(mobileBtn && sidebar && overlay) {
+            function toggleSidebar() {
+                const isClosed = sidebar.classList.contains('-translate-x-full');
+                if (isClosed) {
+                    sidebar.classList.remove('-translate-x-full');
+                    overlay.classList.remove('hidden');
+                    setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                } else {
+                    sidebar.classList.add('-translate-x-full');
+                    overlay.classList.add('opacity-0');
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                }
+            }
+            mobileBtn.addEventListener('click', toggleSidebar);
+            if(closeBtn) closeBtn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
         }
-    }
 
-    mobileBtn.addEventListener('click', toggleSidebar);
-    closeBtn.addEventListener('click', toggleSidebar);
-    overlay.addEventListener('click', toggleSidebar);
+        // 2. Safe Socket.io Logic
+        try {
+            const userEmail = "{{ session.email | default('', true) }}";
+            if (userEmail && typeof io !== 'undefined') {
+                const socket = io();
+                socket.on("connect", () => socket.emit("join", { email: userEmail }));
+                window.addEventListener("beforeunload", () => socket.emit("leave", {}));
+                socket.on("update_users", (onlineList) => console.log("Live activity:", onlineList.length, "users online"));
+            }
+        } catch(e) {
+            console.warn("Socket.io could not load safely.");
+        }
+
+        // 3. Mini Calendar Logic
+        const grid = document.getElementById('calendar-grid');
+        const monthYear = document.getElementById('calendar-month-year');
+        const prevBtn = document.getElementById('prev-month');
+        const nextBtn = document.getElementById('next-month');
+        
+        if (grid && monthYear) {
+            let currentDate = new Date(); 
+            const realToday = new Date();
+
+            function renderCalendar(date) {
+                grid.innerHTML = '';
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                
+                // Set Month/Year Title
+                monthYear.textContent = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(date);
+                
+                // Calculate days
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                
+                // Add empty slots for days before the 1st
+                for (let i = 0; i < firstDay; i++) {
+                    grid.innerHTML += `<div></div>`;
+                }
+                
+                // Render days
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const isToday = i === realToday.getDate() && month === realToday.getMonth() && year === realToday.getFullYear();
+                    
+                    const classes = isToday 
+                        ? 'bg-violet-500 text-white rounded-lg font-bold shadow-md shadow-violet-200 py-1.5 cursor-default' 
+                        : 'py-1.5 hover:bg-slate-200 hover:text-violet-600 rounded-lg cursor-pointer transition-colors';
+                    
+                    grid.innerHTML += `<div class="${classes}">${i}</div>`;
+                }
+            }
+
+            renderCalendar(currentDate);
+
+            prevBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar(currentDate);
+            });
+            nextBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar(currentDate);
+            });
+        }
+    })();
 </script>
 
 {% endblock %}
