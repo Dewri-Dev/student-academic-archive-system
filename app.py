@@ -3,6 +3,9 @@ import os
 from werkzeug.utils import secure_filename
 import sqlite3
 from datetime import datetime
+import requests
+from bs4 import BeautifulSoup
+import urllib3
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev_key")
@@ -161,6 +164,58 @@ def init_db():
     conn.close()
 
 init_db()
+
+# This hides annoying warning messages in your console about unverified SSL certificates
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+def fetch_astu_notices():
+    """Scrapes the latest notices directly from ASTU's official website using smart filtering."""
+    url = "https://astu.ac.in/?page_id=561" 
+    notices = []
+    
+    try:
+        # Disguise the Python script as a real web browser
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+        
+        response = requests.get(url, headers=headers, timeout=5, verify=False) 
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Scan ALL links on the page
+        for link in soup.find_all('a'):
+            title = link.text.strip()
+            href = link.get('href', '')
+            
+            # Rule: Real notices usually have longer text and contain specific keywords
+            is_valid_notice = len(title) > 15 and (
+                "notice" in title.lower() or 
+                "notification" in title.lower() or 
+                "result" in title.lower() or 
+                "schedule" in title.lower() or 
+                "fee" in title.lower() or
+                "registration" in title.lower() or
+                "convocation" in title.lower()
+            )
+            
+            if is_valid_notice and href:
+                # Prevent adding the exact same notice twice
+                if not any(n['title'] == title for n in notices):
+                    notices.append({
+                        "title": title,
+                        # Make sure relative links are converted to full clickable URLs
+                        "link": href if href.startswith('http') else f"https://astu.ac.in/{href.lstrip('/')}",
+                        "date": "Latest Update"
+                    })
+                    
+            if len(notices) >= 3: # Stop after getting the top 3
+                break
+                
+    except Exception as e:
+        print(f"Error fetching ASTU notices: {e}")
+        notices = [{"title": "ASTU site currently unreachable. Check back later.", "link": "https://astu.ac.in/?page_id=561", "date": "Error"}]
+        
+    return notices
 # ==========================================
 # CORE ROUTES
 # ==========================================
@@ -190,6 +245,50 @@ def home():
     """, (today,))
     past_raw = c.fetchall()
 
+    # --- NEW DASHBOARD STATS LOGIC ---
+    overall_cgpa = "0.00"
+    total_credits = 0
+    fee_balance = "0.00"
+    payment_status = "Fully Paid"
+
+    if "user_id" in session:
+        user_id = session["user_id"]
+
+        # 1. Calculate CGPA
+        c.execute("SELECT credits, sgpa FROM cgpa_records WHERE user_id = ?", (user_id,))
+        cgpa_records = c.fetchall()
+        if cgpa_records:
+            cgpa_credits = sum(r[0] for r in cgpa_records)
+            weighted_sum = sum(r[0] * r[1] for r in cgpa_records)
+            overall_cgpa = f"{(weighted_sum / cgpa_credits):.2f}" if cgpa_credits > 0 else "0.00"
+
+        # 2. Calculate Credits
+        c.execute("SELECT SUM(credits) FROM credit_history WHERE user_id = ?", (user_id,))
+        credits_result = c.fetchone()
+        total_credits = credits_result[0] if credits_result and credits_result[0] else 0
+
+        # 3. Calculate Fee Balance
+        c.execute("SELECT semester, total_fee FROM fee_structure")
+        all_fees = c.fetchall()
+        
+        c.execute("SELECT semester, status FROM student_payments WHERE user_id=?", (user_id,))
+        payments = {row[0]: row[1] for row in c.fetchall()}
+        
+        total_due = 0
+        for fee in all_fees:
+            sem = fee[0]
+            total = fee[1]
+            status = payments.get(sem, 'Not Paid')
+            if status != 'Paid':
+                total_due += total
+        
+        fee_balance = f"{total_due:,.2f}"
+        payment_status = "Fully Paid" if total_due == 0 else "Dues Pending"
+    # ---------------------------------
+        
+    # 1. Fetch live ASTU notices!
+    live_notices = fetch_astu_notices()
+
     conn.close()
     
     def process_holidays(h_list):
@@ -209,7 +308,12 @@ def home():
     return render_template(
         "index.html",
         upcoming_holidays=process_holidays(upcoming_raw),
-        past_holidays=process_holidays(past_raw)
+        past_holidays=process_holidays(past_raw),
+        overall_cgpa=overall_cgpa,
+        total_credits=total_credits,
+        fee_balance=fee_balance,
+        payment_status=payment_status,
+        astu_notices=live_notices
     )
 
 @app.route("/login", methods=["GET", "POST"])
