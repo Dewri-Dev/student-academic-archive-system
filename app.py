@@ -656,6 +656,56 @@ def toggle_payment():
     
     return redirect(url_for('finance'))
 
+@app.route('/finance/manage')
+def manage_finance():
+    if not session.get("is_admin"):
+        return redirect(url_for("home"))
+        
+    conn = get_db_connection()
+    c = conn.cursor()
+    c.execute("SELECT semester, admission_fee, campus_fee, course_fee, total_fee FROM fee_structure ORDER BY semester")
+    fee_structure = c.fetchall()
+    conn.close()
+    
+    return render_template('manage_finance.html', fee_structure=fee_structure)
+
+@app.route('/finance/edit/<int:semester>', methods=['GET', 'POST'])
+def edit_finance(semester):
+    if not session.get("is_admin"):
+        return redirect(url_for("home"))
+        
+    conn = get_db_connection()
+    c = conn.cursor()
+    
+    if request.method == 'POST':
+        # Grab the updated fees from the form
+        admission_fee = int(request.form['admission_fee'])
+        campus_fee = int(request.form['campus_fee'])
+        course_fee = int(request.form['course_fee'])
+        
+        # Auto-calculate the total so the admin doesn't have to
+        total_fee = admission_fee + campus_fee + course_fee
+        
+        c.execute("""
+            UPDATE fee_structure 
+            SET admission_fee=?, campus_fee=?, course_fee=?, total_fee=? 
+            WHERE semester=?
+        """, (admission_fee, campus_fee, course_fee, total_fee, semester))
+        
+        conn.commit()
+        conn.close()
+        return redirect(url_for('manage_finance'))
+        
+    # GET request: fetch the current fees to pre-fill the form
+    c.execute("SELECT semester, admission_fee, campus_fee, course_fee FROM fee_structure WHERE semester=?", (semester,))
+    fee = c.fetchone()
+    conn.close()
+    
+    if not fee:
+        return "Semester not found", 404
+        
+    return render_template('edit_finance.html', fee=fee)
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
